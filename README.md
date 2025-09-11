@@ -18,7 +18,7 @@ An app used for tracking scores for sports, can also create and share non-offici
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] Proper use of Markdown
+- [ x] Proper use of Markdown
 - [ ] A concise and compelling elevator pitch
 - [ ] Description of key features
 - [ ] Description of how you will use each technology
@@ -26,7 +26,7 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 ### Elevator pitch
 
-This app allows you to track and share personal scoreboards and individuals stats optionally. This works great for sharing games and players stats as well as tracking them over extended periods of time.
+This app allows you to track and share personal scoreboards and individuals stats optionally. This works great for sharing games and players stats as well as tracking them over extended periods of time. This allows you to save important information for the teams, and the players in an easy manner. Allowing the stat keepers to save this information and focus on whats really important, the game. 
 
 ### Design
 
@@ -45,18 +45,19 @@ sequenceDiagram
 
 - Show scores for two teams with quick and easy modification as the game goes on. 
 - Option to add individual players and track their stats.
-- Viewing and storing past games and information. 
+- Viewing and storing past games and information.
+- Ability to save scoresheets in a text format. 
 
 ### Technologies
 
 I am going to use the required technologies in the following ways.
 
-- **HTML** - Description here
-- **CSS** - Description here
-- **React** - Description here
-- **Service** - Description here
-- **DB/Login** - Description here
-- **WebSocket** - Description here
+- **HTML** - Makes up the structure of the application
+- **CSS** - Used for formatting and to help keep the application clean.
+- **React** - Live updates for the game
+- **Service** - Retrieves information for past games or saving scores
+- **DB/Login** - Allows users to easily retrieve information from their past games
+- **WebSocket** - real time score updates across devices. 
 
 ## 🚀 AWS deliverable
 
