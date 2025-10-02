@@ -83,12 +83,12 @@ For this deliverable I did the following. I checked the box `[x]` and added a de
 
 For this deliverable I did the following. I checked the box `[x]` and added a description for things I completed.
 
-- [ ] **Header, footer, and main content body** - I did not complete this part of the deliverable.
-- [ ] **Navigation elements** - I did not complete this part of the deliverable.
-- [ ] **Responsive to window resizing** - I did not complete this part of the deliverable.
-- [ ] **Application elements** - I did not complete this part of the deliverable.
-- [ ] **Application text content** - I did not complete this part of the deliverable.
-- [ ] **Application images** - I did not complete this part of the deliverable.
+- [X] **Header, footer, and main content body** - All of which were styled, the header and footer are different colors from the body to show seperation and the texts centered.
+- [X] **Navigation elements** - Styled so it sits horizontally instead of vertical, and learned how to make it look like buttons for nav ul.
+- [X] **Responsive to window resizing** Resizes and if the background height is under a certain height it replaces the background so instead of an image its just a solid color
+- [X] **Application elements** - I did not complete this part of the deliverable.
+- [X] **Application text content** - Modified text color and font, for headers as well body text.
+- [X] **Application images** Utilized images as background of home page
 
 ## 🚀 React part 1: Routing deliverable
 
