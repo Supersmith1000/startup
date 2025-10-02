@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../simon-html"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "startup",
+		"liveServer.settings.port": 5501
+	}
+}

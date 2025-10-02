@@ -27,12 +27,12 @@ h1 {
     color: rgb(255, 255, 255);
 }
 nav ul {
-  list-style: none;         /* remove bullets */
+  list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;            /* lay items side by side */
-  justify-content: center;  /* center them horizontally */
-  gap: 1rem;                /* space between links */
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
   padding: 0.75rem;
 }
 
@@ -41,7 +41,7 @@ body::before {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4); /* darkens background slightly */
+  background: rgba(0,0,0,0.4);
   z-index: -1;
 }
 
