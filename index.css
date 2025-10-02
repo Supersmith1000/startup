@@ -1,3 +1,30 @@
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap; 
+}
+nav ul li { 
+  flex: 0 0 auto;
+}
+
+nav ul li a {
+  display: inline-block;
+  text-decoration: none;
+  white-space: nowrap;
+  
+  color: #333;
+  background-color: #f5f5f5;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background 0.3s, color 0.3s;
+}
+
+nav ul li a:hover {
+  background-color: #333;
+  color: #fff;
+}
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -53,4 +80,10 @@ footer {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+}
+@media (max-height: 600px) {
+  body {
+    background-image: none;   /* removes the background image */
+    background-color: #2E2E2E; /* fallback solid color */
+  }
 }

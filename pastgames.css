@@ -38,6 +38,9 @@ body {
   margin: 0;
 }
 
+main   {
+  animation-name: demo;
+}
 footer {
   background-color: #4A4A4A;
   color: #ffffff;
