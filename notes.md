@@ -1,7 +1,247 @@
 # CS 260 Notes
 
 [My startup - Simon](https://simon.cs260.click)
+link element
+Loads external resources (most often CSS) into the document head.
+Example: <link rel="stylesheet" href="styles.css">
 
+div tag
+A generic block-level container used to group content for styling/layout. It has no semantic meaning by itself.
+
+#title vs .grid
+#title selects the single element with id="title".
+.grid selects all elements with class="grid".
+Specificity: #id > .class.
+
+padding vs margin
+Padding = space inside the border (between content and border).
+Margin = space outside the border (between the element and neighbors).
+
+Images with flex (general rules)
+
+display: flex arranges children in a row by default (flex-direction: row).
+
+flex-wrap: wrap lets them wrap to new lines.
+
+justify-content controls horizontal distribution; align-items controls cross-axis alignment; gap sets spacing between items.
+
+Child sizing often via flex: 1 1 200px; etc.
+
+“padding: …” does what?
+
+padding: 10px; → all sides 10px
+
+padding: 10px 20px; → top/bottom 10px, left/right 20px
+
+padding: 5px 10px 15px; → top 5, left/right 10, bottom 15
+
+padding: 1px 2px 3px 4px; → top/right/bottom/left
+
+Arrow function declaration
+Creates a function with concise syntax and lexical this.
+Example: const add = (a, b) => a + b;
+
+Array.map output
+Returns a new array of the return values, same length, doesn’t mutate original.
+Example: [1,2,3].map(n => n*2) // [2,4,6]
+
+getElementById + addEventListener
+Finds an element by id and attaches an event handler.
+
+document.getElementById('btn').addEventListener('click', () => {
+  console.log('clicked');
+});
+
+
+“# selector” line does what?
+In CSS: #title {…} styles the element with id="title".
+In JS: document.querySelector('#title') selects that element.
+
+DOM truths (mark all that apply)
+
+The DOM is a tree representation of the document.
+
+You can query and modify nodes at runtime.
+
+Events bubble/capture through the tree.
+(Those are all true.)
+
+span default display
+inline.
+
+Make all divs red with CSS
+
+div { background-color: red; }
+
+
+Image with a hyperlink
+
+<a href="https://example.com">
+  <img src="pic.jpg" alt="Description">
+</a>
+
+
+CSS box model order (inside → outside)
+content → padding → border → margin.
+
+Make only the word “trouble” green (not “double”)
+You need a wrapper or selector that isolates that text:
+
+<p>double <span class="trouble">trouble</span></p>
+
+.trouble { color: green; }
+
+
+For-loop + console.log output
+General rule: it logs each iteration value in order.
+Example:
+
+for (let i=0; i<3; i++) console.log(i);
+// 0, 1, 2 (each on its own line)
+
+
+Select element with id “byu” and turn text green
+
+document.getElementById('byu').style.color = 'green';
+
+
+Opening tags:
+
+paragraph: <p>
+
+ordered list: <ol>
+
+unordered list: <ul>
+
+second-level heading: <h2>
+
+first-level heading: <h1>
+
+third-level heading: <h3>
+
+Declare HTML5 doctype
+<!DOCTYPE html>
+
+Valid JS syntax (quick patterns)
+
+if (x) { ... } else { ... }
+
+for (let i=0; i<n; i++) { ... }
+
+while (cond) { ... }
+
+switch (v) {
+  case 1: ...; break;
+  default: ...;
+}
+
+
+Create a JS object
+
+const obj = { name: 'A', count: 3 };
+
+
+Add new properties to objects?
+Yes.
+
+obj.newProp = 42;
+
+
+Include JavaScript on an HTML page
+Inline:
+
+<script>
+  console.log('hi');
+</script>
+
+
+External:
+
+<script src="app.js"></script>
+
+
+Change “animal” to “crow” but leave “fish” untouched
+(Select just the “animal” node—usually by id or class.)
+
+<p id="animal">animal</p><p>fish</p>
+<script>
+  document.getElementById('animal').textContent = 'crow';
+</script>
+
+
+JSON description
+Text format for structured data: key/value pairs, arrays, numbers, booleans, strings, null. Keys and string values are in double quotes. No functions or comments. Example:
+{"name":"Alex","age":20,"pets":["dog"]}
+
+Console command cheatsheet
+
+chmod change file permissions
+
+pwd print working directory
+
+cd change directory
+
+ls list directory contents
+
+vim terminal editor
+
+nano terminal editor (simpler)
+
+mkdir make directory
+
+mv move/rename files
+
+rm remove files
+
+man show manual pages
+
+ssh remote shell login
+
+ps list running processes
+
+wget download by URL
+
+sudo run as superuser
+
+Command that creates a remote shell session
+ssh user@host
+
+ls -la truth
+Shows a long listing of all files (including dotfiles/hidden), with perms, owner, size, timestamps.
+
+Domain parts for banana.fruit.bozo.click
+
+TLD: click
+
+Root (registrable) domain: bozo.click
+
+Subdomain(s): fruit.bozo.click is one level; banana.fruit.bozo.click nests another. (So banana.fruit is the subdomain chain of bozo.click.)
+
+Is a web certificate necessary for HTTPS?
+Yes—browsers require a valid TLS certificate for trusted HTTPS connections.
+
+Can a DNS A record point to an IP or another A record?
+An A record maps only to an IPv4 address (not to another A record). So “IP or another A” → False. (Use CNAME to point to another name.)
+
+Ports 443, 80, 22 reserved for what?
+443 → HTTPS, 80 → HTTP, 22 → SSH.
+
+Promises output ordering (general rules)
+
+Code in the Promise executor runs immediately (synchronously).
+
+.then/.catch callbacks run as microtasks after the current call stack but before normal timers.
+
+setTimeout(..., 0) runs later as a macrotask.
+Typical order for:
+
+console.log('A');
+Promise.resolve().then(() => console.log('B'));
+setTimeout(() => console.log('C'), 0);
+console.log('D');
+
+
+Output: A, D, B, C (each on its own line).
 ## Helpful links
 
 - [Course instruction](https://github.com/webprogramming260)
