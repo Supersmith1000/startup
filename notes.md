@@ -1,6 +1,7 @@
 # CS 260 Notes
 
 [My startup - Simon](https://simon.cs260.click)
+
 link element
 Loads external resources (most often CSS) into the document head.
 Example: <link rel="stylesheet" href="styles.css">
@@ -312,28 +313,31 @@ I also used SVG to make the icon and logo for the app. This turned out to be a p
 
 Setting up Vite and React was pretty simple. I had a bit of trouble because of conflicting CSS. This isn't as straight forward as you would find with Svelte or Vue, but I made it work in the end. If there was a ton of CSS it would be a real problem. It sure was nice to have the code structured in a more usable way.
 
-## React Part 2: Reactivity
+## My notes
+Port 442 is https, port 80 is http. For img its <img src='link' alt='description' width='sizing'/> link is href. Tr is table row, th is table head, td is table cell. text	Single line textual value
+password	Obscured password
+email	Email address
+tel	Telephone number
+url	URL address
+number	Numerical value
+checkbox	Inclusive selection
+radio	Exclusive selection
+range	Range limited number
+date	Year, month, day
+datetime-local	Date and time
+month	Year, month
+week	Week of year
+color	Color
+file	Local file
+submit	button to trigger form submission
+form	Input container and submission	<form action="form.html" method="post">
+fieldset	Labeled input grouping	<fieldset> ... </fieldset>
+input	Multiple types of user input	<input type="" />
+select	Selection dropdown	<select><option>1</option></select>
+optgroup	Grouped selection dropdown	<optgroup><option>1</option></optgroup>
+option	Selection option	<option selected>option2</option>
+textarea	Multiline text input	<textarea></textarea>
+label	Individual input label	<label for="range">Range: </label>
+output	Output of input	<output for="range">0</output>
+meter	Display value with a known range	<meter min="0" max="100" value="50"></meter>
 
-This was a lot of fun to see it all come together. I had to keep remembering to use React state instead of just manipulating the DOM directly.
-
-Handling the toggling of the checkboxes was particularly interesting.
-
-```jsx
-<div className="input-group sound-button-container">
-  {calmSoundTypes.map((sound, index) => (
-    <div key={index} className="form-check form-switch">
-      <input
-        className="form-check-input"
-        type="checkbox"
-        value={sound}
-        id={sound}
-        onChange={() => togglePlay(sound)}
-        checked={selectedSounds.includes(sound)}
-      ></input>
-      <label className="form-check-label" htmlFor={sound}>
-        {sound}
-      </label>
-    </div>
-  ))}
-</div>
-```
