@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchGames } from './services/gamesService.js';
+import { fetchGames } from "../gamesService.js";
 
 export default function PastGames() {
   const [query, setQuery] = useState('');

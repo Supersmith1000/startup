@@ -1,5 +1,5 @@
 import React from 'react';
-import Scoreboard from './Scoreboard';
+import Scoreboard from "../scoreboard.jsx";
 
 export function Newgame() {
   return (
