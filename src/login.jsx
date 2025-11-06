@@ -4,18 +4,21 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [isLogin, setIsLogin] = useState(true); // toggle between login/create
+  const [isLogin, setIsLogin] = useState(true);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/create';
+    const base = 'http://localhost:3000';
+    const endpoint = isLogin
+      ? `${base}/api/auth/login`
+      : `${base}/api/auth/create`;
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // keep auth cookie
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -25,11 +28,24 @@ export function Login() {
         setEmail('');
         setPassword('');
       } else {
-        const err = await response.json();
+        const err = await response.json().catch(() => ({}));
         setMessage(`❌ ${err.msg || 'Login failed'}`);
       }
     } catch {
-      setMessage('⚠️ Network error — is the backend running?');
+      setMessage('⚠️ Network error — is the backend running on 3000?');
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/logout', {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (res.ok) setMessage('👋 Logged out');
+      else setMessage('⚠️ Logout failed');
+    } catch {
+      setMessage('⚠️ Logout failed');
     }
   }
 
@@ -64,7 +80,9 @@ export function Login() {
           </div>
 
           <div>
-            <button type="submit">{isLogin ? 'Login' : 'Create Account'}</button>
+            <button type="submit">
+              {isLogin ? 'Login' : 'Create Account'}
+            </button>
           </div>
         </form>
 
@@ -80,6 +98,10 @@ export function Login() {
             {isLogin ? 'Create one' : 'Login'}
           </button>
         </p>
+
+        <button type="button" onClick={handleLogout}>
+          Logout
+        </button>
 
         {message && <p>{message}</p>}
       </section>
