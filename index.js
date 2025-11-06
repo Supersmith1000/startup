@@ -14,7 +14,7 @@ if (typeof fetch === 'undefined') {
 // allow 5173 to talk to 3000
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://startup.who-1.com'],
     credentials: true,
   })
 );
@@ -23,7 +23,8 @@ let users = [];
 let scores = [];
 let games = [];
 
-const port = process.argv.length > 2 ? process.argv[2] : 3000;
+const port = process.argv.length > 2 ? process.argv[2] : 4000;
+
 
 // ====== Middleware ======
 app.use(express.json());
@@ -108,7 +109,7 @@ apiRouter.get('/nba', async (req, res) => {
       `https://api.balldontlie.io/v1/games?dates[]=${today}`,
       {
         headers: {
-          Authorization: '2873b959-b285-4125-a3a7-682509f51981',
+          Authorization: 'Bearer 2873b959-b285-4125-a3a7-682509f51981',
         },
       }
     );

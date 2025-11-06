@@ -8,9 +8,10 @@ export function Stat() {
     async function loadGames() {
       try {
         // 👇 Directly call your Express backend on port 3000
-        const response = await fetch('http://localhost:3000/api/nba', {
-          credentials: 'include',
-        });
+        const response = await fetch('/api/nba', {
+        credentials: 'include',
+      });
+
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
