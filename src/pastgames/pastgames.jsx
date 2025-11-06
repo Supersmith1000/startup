@@ -3,18 +3,25 @@ import { fetchGames } from "../gamesService.js";
 
 export default function PastGames() {
   const [query, setQuery] = useState('');
-  const [games, setGames] = useState(null);
+  const [games, setGames] = useState([]);
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const data = await fetchGames();
-        if (alive) setGames(data);
-      } catch {
-        if (alive) setError('Failed to load games.');
+        if (alive) {
+          setGames(data);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (alive) {
+          setError('❌ Failed to load games.');
+          setLoading(false);
+        }
       }
     })();
     return () => { alive = false; };
@@ -22,45 +29,53 @@ export default function PastGames() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!games) return;
+    if (!games.length) return;
+
     const q = query.trim().toLowerCase();
-    setResults(games.filter(g => g.id.toLowerCase().includes(q)));
+    const filtered = games.filter((g) =>
+      String(g.id || '').toLowerCase().includes(q)
+    );
+    setResults(filtered);
   }
 
+  if (loading) return <p>Loading past games…</p>;
   if (error) return <p className="text-danger">{error}</p>;
-  if (games === null) return <p>Loading past games…</p>;
+
+  const displayGames = results.length ? results : games;
 
   return (
     <main>
       <section>
-        <h2>Search past games</h2>
-        <p>Enter Game ID:</p>
+        <h2>Search Past Games</h2>
+        <p>Enter a Game ID:</p>
 
         <form onSubmit={handleSubmit} className="d-flex gap-2">
           <label htmlFor="gameId" className="visually-hidden">Game ID</label>
           <input
             id="gameId"
             type="text"
-            placeholder="G-101"
+            placeholder="e.g. 1"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            required
           />
           <button type="submit">Search</button>
         </form>
 
         <hr />
 
-        {results.length ? (
+        {displayGames.length ? (
           <ul>
-            {results.map(g => (
-              <li key={g.id}>
-                <strong>{g.id}</strong> — {g.team1} {g.score1} — {g.score2} {g.team2} (Winner: {g.winner})
+            {displayGames.map((g) => (
+              <li key={g.id || g.date}>
+                <strong>ID {g.id}</strong> — 
+                <span> {g.team || `${g.team1 ?? ''} vs ${g.team2 ?? ''}`} </span> — 
+                <span>Score: {g.score ?? 'N/A'}</span> — 
+                <span>{new Date(g.date).toLocaleString()}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No results yet. Try a valid ID.</p>
+          <p>No games found.</p>
         )}
       </section>
       <aside></aside>
