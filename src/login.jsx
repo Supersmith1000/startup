@@ -9,10 +9,8 @@ export function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const base = 'http://localhost:3000';
-    const endpoint = isLogin
-      ? `${base}/api/auth/login`
-      : `${base}/api/auth/create`;
+    // 👇 Use relative URLs so it works locally & on your live site
+    const endpoint = isLogin ? '/api/auth/login' : '/api/auth/create';
 
     try {
       const response = await fetch(endpoint, {
@@ -32,13 +30,13 @@ export function Login() {
         setMessage(`❌ ${err.msg || 'Login failed'}`);
       }
     } catch {
-      setMessage('⚠️ Network error — is the backend running on 3000?');
+      setMessage('⚠️ Network error — please try again.');
     }
   }
 
   async function handleLogout() {
     try {
-      const res = await fetch('http://localhost:3000/api/auth/logout', {
+      const res = await fetch('/api/auth/logout', {
         method: 'DELETE',
         credentials: 'include',
       });
