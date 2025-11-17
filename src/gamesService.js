@@ -1,5 +1,5 @@
 const KEY = 'who1.games';
-const API_URL = 'http://localhost:3000/api';
+const API_URL = '/api';
 
 export async function fetchGames() {
   try {
