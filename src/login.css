@@ -29,7 +29,7 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
 
-  background-image: url("Main\ Page.jpeg");
+  background-image: url("/main.jpeg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

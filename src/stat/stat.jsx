@@ -7,18 +7,19 @@ export function Stat() {
   useEffect(() => {
     async function loadGames() {
       try {
-        // 👇 Directly call your Express backend on port 3000
         const response = await fetch('/api/nba', {
-        credentials: 'include',
-      });
-
+          credentials: 'include',
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        setGames(data.data || []);
+
+        // ✅ your API response uses data.data
+        setGames(data.data ?? []);
+
       } catch (err) {
         console.error('Failed to load NBA data:', err);
         setError('❌ Unable to load live NBA games.');
@@ -42,6 +43,7 @@ export function Stat() {
           >
             <strong>{g.visitor_team.full_name}</strong> vs{' '}
             <strong>{g.home_team.full_name}</strong>
+
             <div>
               Tip-off:{' '}
               {new Date(g.datetime).toLocaleTimeString([], {
@@ -49,9 +51,11 @@ export function Stat() {
                 minute: '2-digit',
               })}
             </div>
+
             <div>
               Status: {g.status.includes('T') ? 'Scheduled' : g.status}
             </div>
+
             <div>
               Score: {g.visitor_team_score} - {g.home_team_score}
             </div>

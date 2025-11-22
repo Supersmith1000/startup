@@ -30,6 +30,9 @@ export default function App() {
         </header>
 
         <Routes>
+        {/* Add this line so / loads correctly */}
+          <Route path='/' element={<Login />} />
+          
           <Route path='/login' element={<Login />} />
           <Route path='/view' element={<View />} />
           <Route path='/newgame' element={<Newgame />} />
@@ -37,9 +40,9 @@ export default function App() {
           <Route path='/about' element={<About />} />
           <Route path='/stat' element={<Stat />} />
 
-          {/* default / fallback route */}
+          {/* fallback route */}
           <Route path='*' element={<NotFound />} />
-        </Routes>
+      </Routes>
 
         <footer>
           <p>Author Name(s): Andrew Smith</p>
