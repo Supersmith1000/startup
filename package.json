@@ -2,7 +2,7 @@
   "name": "startup",
   "version": "1.0.0",
   "description": "[My Notes](notes.md)",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -12,7 +12,7 @@ const {
   updateUser,
   addGame,
   getGamesByUser,
-} = require('./database');
+} = require('./service/database');
 
 const app = express();
 
