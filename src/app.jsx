@@ -2,7 +2,15 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './login.css';
 
-import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
+import { 
+  BrowserRouter, 
+  NavLink, 
+  Route, 
+  Routes, 
+  Navigate, 
+  useLocation 
+} from 'react-router-dom';
+
 import { Login } from './login';
 import { About } from './about/about';
 import { Newgame } from './newgame/newgame';
@@ -13,7 +21,27 @@ import { View } from './view/view';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="body bg-dark text-light">
+      <MainLayout />
+    </BrowserRouter>
+  );
+}
+
+function MainLayout() {
+  const location = useLocation();
+
+  // Hide header & footer on login page
+  const hideChrome = location.pathname === '/login';
+  React.useEffect(() => {
+    if (location.pathname === "/login") {
+      document.body.classList.add("login-mode");
+    } else {
+      document.body.classList.remove("login-mode");
+    }
+  }, [location.pathname]);
+  return (
+    <div className="body bg-dark text-light">
+
+      {!hideChrome && (
         <header>
           <h1>WHO-1</h1>
           <p>Features</p>
@@ -28,28 +56,29 @@ export default function App() {
             </ul>
           </nav>
         </header>
+      )}
 
-        <Routes>
-        {/* Add this line so / loads correctly */}
-          <Route path='/' element={<Login />} />
-          
-          <Route path='/login' element={<Login />} />
-          <Route path='/view' element={<View />} />
-          <Route path='/newgame' element={<Newgame />} />
-          <Route path='/pastgames' element={<PastGames />} />
-          <Route path='/about' element={<About />} />
-          <Route path='/stat' element={<Stat />} />
+      <Routes>
+        {/* Homepage → login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* fallback route */}
-          <Route path='*' element={<NotFound />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/view" element={<View />} />
+        <Route path="/newgame" element={<Newgame />} />
+        <Route path="/pastgames" element={<PastGames />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/stat" element={<Stat />} />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
+      {!hideChrome && (
         <footer>
           <p>Author Name(s): Andrew Smith</p>
           <div><a href="https://github.com/Supersmith1000/startup">GitHub</a></div>
         </footer>
-      </div>
-    </BrowserRouter>
+      )}
+    </div>
   );
 }
 
