@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import "./ws.css";
 
 export function TempSocket() {
   const [messages, setMessages] = useState([]);
@@ -7,14 +8,13 @@ export function TempSocket() {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    // ✔ Automatically chooses correct host (dev or production)
     const wsUrl =
       window.location.hostname === "localhost"
         ? "ws://localhost:4000/ws"
         : "wss://startup.who-1.com/ws";
 
     const ws = new WebSocket(wsUrl);
-    wsRef.value = ws;
+    wsRef.current = ws; // <-- FIXED
 
     ws.onopen = () => {
       setConnected(true);
@@ -30,14 +30,16 @@ export function TempSocket() {
       setMessages((prev) => [...prev, "🔴 WebSocket disconnected"]);
     };
 
-    return () => ws.close();
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+    };
   }, []);
 
   function sendMessage() {
     if (input.trim() === "") return;
-    if (!wsRef.value) return;
+    if (!wsRef.current) return;
 
-    wsRef.value.send(input);
+    wsRef.current.send(input); // <-- FIXED
     setMessages((prev) => [...prev, `📤 You: ${input}`]);
     setInput("");
   }

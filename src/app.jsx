@@ -5,11 +5,11 @@ import {
   Route,
   Routes,
   Navigate,
-  useLocation
+  useLocation,
 } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./login.css";
+import "./app.css";
 
 import { Login } from "./login";
 import { About } from "./about/about";
@@ -18,7 +18,6 @@ import PastGames from "./pastgames/pastgames.jsx";
 import { Stat } from "./stat/stat";
 import { View } from "./view/view";
 import { TempSocket } from "./websocket/TempSocket.jsx";
-
 
 export default function App() {
   return (
@@ -30,44 +29,28 @@ export default function App() {
 
 function MainLayout() {
   const location = useLocation();
-
-  // Hide header/footer on login page
   const hideChrome = location.pathname === "/login";
 
   return (
-    <div className="app-container bg-dark text-light" style={{ minHeight: "100vh" }}>
-      
-      {/* ----- HEADER ----- */}
-      {!hideChrome && (
-        <header className="text-center" style={{ padding: "20px 0" }}>
-          <h1 style={{ marginBottom: "5px" }}>WHO-1</h1>
-          <p style={{ marginBottom: "15px" }}>Features</p>
+    <div className="app-root">
 
-          <nav>
-            <ul
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "15px",
-                flexWrap: "wrap",
-                listStyle: "none",
-                padding: 0
-              }}
-            >
-              <li><NavLink className="nav-btn" to="/login">Login</NavLink></li>
-              <li><NavLink className="nav-btn" to="/view">View Games</NavLink></li>
-              <li><NavLink className="nav-btn" to="/newgame">New Game</NavLink></li>
-              <li><NavLink className="nav-btn" to="/pastgames">Past Games</NavLink></li>
-              <li><NavLink className="nav-btn" to="/stat">Stats</NavLink></li>
-              <li><NavLink className="nav-btn" to="/about">About</NavLink></li>
-              <li><NavLink className="nav-btn" to="/ws-test">WS Test</NavLink></li>
-            </ul>
+      {!hideChrome && (
+        <header className="app-header">
+          <h1 className="app-title">WHO-1</h1>
+
+          <nav className="app-nav">
+            <NavLink to="/login">Login</NavLink>
+            <NavLink to="/view">View Games</NavLink>
+            <NavLink to="/newgame">New Game</NavLink>
+            <NavLink to="/pastgames">Past Games</NavLink>
+            <NavLink to="/stat">Stats</NavLink>
+            <NavLink to="/about">About</NavLink>
+            <NavLink to="/ws-test">WS Test</NavLink>
           </nav>
         </header>
       )}
 
-      {/* ----- ROUTES ----- */}
-      <div style={{ width: "100%", maxWidth: "900px", margin: "0 auto" }}>
+      <main className="app-content">
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
@@ -79,31 +62,21 @@ function MainLayout() {
           <Route path="/ws-test" element={<TempSocket />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </div>
+      </main>
 
-      {/* ----- FOOTER ----- */}
       {!hideChrome && (
-        <footer className="text-center" style={{ padding: "30px 0" }}>
-          <p style={{ marginBottom: "4px" }}>
-            Author Name(s): Andrew Smith
-          </p>
-          <a
-            href="https://github.com/Supersmith1000/startup"
-            style={{ color: "#59bfff", textDecoration: "underline" }}
-          >
-            GitHub
-          </a>
+        <footer className="app-footer">
+          <p>Author: Andrew Smith</p>
         </footer>
       )}
-
     </div>
   );
 }
 
 function NotFound() {
   return (
-    <main className="container-fluid bg-secondary text-center" style={{ padding: "50px" }}>
+    <div className="not-found">
       404: Return to sender. Address unknown.
-    </main>
+    </div>
   );
 }

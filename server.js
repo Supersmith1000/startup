@@ -1,3 +1,4 @@
+// ------------------- IMPORTS -------------------
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
@@ -18,7 +19,7 @@ const {
 
 const app = express();
 
-// Fallback fetch for older Node versions
+// Fallback fetch
 if (typeof fetch === 'undefined') {
   global.fetch = (...args) =>
     import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -27,10 +28,9 @@ if (typeof fetch === 'undefined') {
 const authCookieName = 'token';
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
-// ---------- MIDDLEWARE ----------
+// ------------------- MIDDLEWARE -------------------
 app.use(express.json());
 app.use(cookieParser());
-
 app.use(
   cors({
     origin: ['http://localhost:5173', 'https://startup.who-1.com'],
@@ -41,11 +41,11 @@ app.use(
 // Serve React build
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// API Router
+// ------------------- API ROUTER -------------------
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
 
-// ---------- AUTH ROUTES ----------
+// ------------------- AUTH ROUTES -------------------
 apiRouter.post('/auth/create', async (req, res) => {
   const { email, password } = req.body;
 
@@ -89,7 +89,7 @@ apiRouter.delete('/auth/logout', async (req, res) => {
   res.status(204).end();
 });
 
-// ---------- AUTH MIDDLEWARE ----------
+// ------------------- AUTH MIDDLEWARE -------------------
 const verifyAuth = async (req, res, next) => {
   const user = await getUserByToken(req.cookies[authCookieName]);
   if (!user) return res.status(401).send({ msg: 'Unauthorized' });
@@ -98,7 +98,7 @@ const verifyAuth = async (req, res, next) => {
   next();
 };
 
-// ---------- GAMES API ----------
+// ------------------- GAMES API -------------------
 apiRouter.get('/games', verifyAuth, async (req, res) => {
   const games = await getGamesByUser(req.user.email);
   res.send(games);
@@ -125,7 +125,7 @@ apiRouter.get('/games/:id', verifyAuth, async (req, res) => {
   else res.status(404).send({ msg: 'Game not found' });
 });
 
-// ---------- NBA LIVE ROUTE ----------
+// ------------------- NBA LIVE ROUTE -------------------
 apiRouter.get('/nba', async (req, res) => {
   try {
     const estNow = new Date(
@@ -135,7 +135,6 @@ apiRouter.get('/nba', async (req, res) => {
     const y = estNow.getFullYear();
     const m = String(estNow.getMonth() + 1).padStart(2, '0');
     const d = String(estNow.getDate()).padStart(2, '0');
-
     const dateParam = `${y}${m}${d}`;
 
     const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=${dateParam}`;
@@ -154,14 +153,8 @@ apiRouter.get('/nba', async (req, res) => {
         id: event.id,
         status,
         state,
-        home: {
-          name: home?.team?.displayName ?? '',
-          score: Number(home?.score ?? 0),
-        },
-        away: {
-          name: away?.team?.displayName ?? '',
-          score: Number(away?.score ?? 0),
-        },
+        home: { name: home?.team?.displayName ?? '', score: Number(home?.score ?? 0) },
+        away: { name: away?.team?.displayName ?? '', score: Number(away?.score ?? 0) },
       };
     });
 
@@ -172,7 +165,7 @@ apiRouter.get('/nba', async (req, res) => {
   }
 });
 
-// ---------- COOKIE ----------
+// ------------------- COOKIE -------------------
 function setAuthCookie(res, token) {
   res.cookie(authCookieName, token, {
     maxAge: 1000 * 60 * 60 * 24 * 365,
@@ -182,41 +175,68 @@ function setAuthCookie(res, token) {
   });
 }
 
-// ---------- CREATE HTTP SERVER FIRST ----------
+// ------------------- CREATE HTTP SERVER -------------------
 const server = http.createServer(app);
 
-// ---------- WEBSOCKETS ----------
+// ------------------- WEBSOCKETS -------------------
 const wss = new WebSocket.Server({ noServer: true });
 
+// Upgrade HTTP → WS
 server.on('upgrade', (req, socket, head) => {
-  if (req.url.startsWith('/ws')) {
-    wss.handleUpgrade(req, socket, head, (ws) => {
-      wss.emit('connection', ws, req);
-    });
-  } else {
+  if (!req.url.startsWith('/ws')) {
     socket.destroy();
+    return;
   }
-});
 
-wss.on('connection', (ws) => {
-  console.log("WebSocket client connected");
-
-  ws.send(JSON.stringify({
-    type: "connected",
-    msg: "Welcome to WHO-1 WebSocket!"
-  }));
-
-  ws.on('message', (data) => {
-    console.log("WS message:", data.toString());
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    wss.emit('connection', ws, req);
   });
 });
 
-// ---------- FALLBACK FOR REACT ROUTING (MUST BE LAST) ----------
+// ------------------- WS CONNECTION -------------------
+wss.on('connection', (ws, req) => {
+  const fullUrl = new URL(req.url, "http://localhost");
+  ws.gameId = fullUrl.searchParams.get("gameId");
+
+  console.log(`WS client connected to game ${ws.gameId}`);
+
+  ws.send(JSON.stringify({
+    type: "connected",
+    msg: "Welcome to WHO-1 WebSocket!",
+    gameId: ws.gameId
+  }));
+
+  ws.on("message", raw => {
+    let data;
+    try { data = JSON.parse(raw.toString()); }
+    catch { return; }
+
+    if (data.type === "score_update") {
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN &&
+            client.gameId === ws.gameId) {
+          client.send(JSON.stringify({
+            type: "score_update",
+            gameId: ws.gameId,
+            team1: data.team1,
+            team2: data.team2
+          }));
+        }
+      });
+    }
+  });
+
+  ws.on("close", () => {
+    console.log(`WS client disconnected from game ${ws.gameId}`);
+  });
+});
+
+// ------------------- FALLBACK ROUTING -------------------
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// ---------- START SERVER ----------
+// ------------------- START SERVER -------------------
 server.listen(port, () =>
   console.log(`WHO-1 backend running with WebSocket on port ${port}`)
 );

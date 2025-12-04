@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Scoreboard from "../scoreboard.jsx";
+import ScoreboardViewer from "../scoreboard/ScoreboardViewer.jsx";
 
 export function View() {
   const [gameId, setGameId] = useState("");
@@ -13,7 +13,7 @@ export function View() {
 
   return (
     <main style={{ textAlign: "center", padding: "40px 0" }}>
-      <h2>Live Game</h2>
+      <h2>Live Game Viewer</h2>
 
       <div style={{ marginBottom: "15px" }}>
         <label style={{ marginRight: "6px" }}>Game ID#:</label>
@@ -29,7 +29,8 @@ export function View() {
 
       <hr style={{ margin: "30px auto", width: "50%" }} />
 
-      {activeGameId && <Scoreboard gameId={activeGameId} />}
+      {/* Read-only viewer scoreboard */}
+      {activeGameId && <ScoreboardViewer gameId={activeGameId} />}
     </main>
   );
 }

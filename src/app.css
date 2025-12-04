@@ -1,0 +1,66 @@
+/* DARK THEME */
+.app-root {
+  min-height: 100vh;
+  background: #1c1e22;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.app-header {
+  text-align: center;
+  padding: 25px 0;
+  background: #111;
+  border-bottom: 1px solid #333;
+}
+
+.app-title {
+  font-size: 2.2rem;
+  margin: 0;
+}
+
+.app-nav {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.app-nav a {
+  color: #b8c7ff;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.app-nav a.active {
+  color: #4da3ff;
+  font-weight: bold;
+}
+
+/* MAIN CONTENT */
+.app-content {
+  flex-grow: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+/* FOOTER */
+.app-footer {
+  text-align: center;
+  padding: 20px;
+  background: #111;
+  border-top: 1px solid #333;
+  color: #aaa;
+}
+
+/* 404 PAGE */
+.not-found {
+  text-align: center;
+  padding: 50px;
+  color: white;
+  font-size: 1.5rem;
+}
