@@ -1,3 +1,4 @@
+import  { TempSocket } from './websocket/TempSocket.jsx';
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './login.css';
@@ -68,7 +69,7 @@ function MainLayout() {
         <Route path="/pastgames" element={<PastGames />} />
         <Route path="/about" element={<About />} />
         <Route path="/stat" element={<Stat />} />
-
+        <Route path="/ws-test" element={<TempSocket />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 

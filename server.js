@@ -183,7 +183,7 @@ function setAuthCookie(res, token) {
 
 // ---------- FALLBACK FOR REACT ROUTING ----------
 app.use((_req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ---------- WEBSOCKET SUPPORT ----------
