@@ -4,8 +4,14 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
 const path = require('path');
-const { getUser, getUserByToken, addUser, updateUser, addGame, getGamesByUser } =
-  require('./service/database');
+const {
+  getUser,
+  getUserByToken,
+  addUser,
+  updateUser,
+  addGame,
+  getGamesByUser,
+} = require('./service/database');
 
 const app = express();
 
@@ -18,7 +24,7 @@ if (typeof fetch === 'undefined') {
 const authCookieName = 'token';
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
-// ---------- Middleware ----------
+// ---------- MIDDLEWARE ----------
 app.use(express.json());
 app.use(cookieParser());
 
@@ -26,7 +32,7 @@ app.use(
   cors({
     origin: ['http://localhost:5173', 'https://startup.who-1.com'],
     credentials: true,
-  })
+  }),
 );
 
 // Serve React build files
@@ -118,14 +124,14 @@ apiRouter.get('/games/:id', verifyAuth, async (req, res) => {
 // ---------- ESPN NBA LIVE DATA ROUTE ----------
 apiRouter.get('/nba', async (req, res) => {
   try {
-    // Get EST date
+    // Get EST
     const estNow = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+      new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }),
     );
 
     const format = (d) =>
       `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(
-        d.getDate()
+        d.getDate(),
       ).padStart(2, '0')}`;
 
     const today = new Date(estNow);
@@ -134,7 +140,7 @@ apiRouter.get('/nba', async (req, res) => {
 
     const dates = [format(today), format(yesterday)];
 
-    // Fetch both days from ESPN
+    // Fetch both days
     const fetchGames = async (date) => {
       const url = `https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/scoreboard?dates=${date}`;
       const response = await fetch(url);
@@ -147,7 +153,7 @@ apiRouter.get('/nba', async (req, res) => {
       ...(await fetchGames(dates[1])),
     ];
 
-    // remove duplicates
+    // Remove duplicates
     eventUrls = [...new Set(eventUrls)];
 
     const games = await Promise.all(
@@ -159,8 +165,8 @@ apiRouter.get('/nba', async (req, res) => {
         const compResp = await fetch(compUrl);
         const comp = await compResp.json();
 
-        const home = comp.competitors.find((t) => t.homeAway === "home");
-        const away = comp.competitors.find((t) => t.homeAway === "away");
+        const home = comp.competitors.find((t) => t.homeAway === 'home');
+        const away = comp.competitors.find((t) => t.homeAway === 'away');
 
         return {
           id: eventData.id,
@@ -175,18 +181,35 @@ apiRouter.get('/nba', async (req, res) => {
             score: Number(away.score),
           },
         };
-      })
+      }),
     );
 
-    // Only return today's relevant games
-    const filtered = games.filter((g) =>
-      ["in", "pre"].includes(g.state)
-    );
+    // Filter only today's live/upcoming games
+    const filtered = games.filter((g) => ['in', 'pre'].includes(g.state));
 
     res.json({ games: filtered });
-
   } catch (err) {
-    console.error("NBA API error:", err);
-    res.status(500).json({ error: "Failed to fetch games" });
+    console.error('NBA API error:', err);
+    res.status(500).json({ error: 'Failed to fetch games' });
   }
+});
+
+// ---------- COOKIE ----------
+function setAuthCookie(res, token) {
+  res.cookie(authCookieName, token, {
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+    secure: true,
+    httpOnly: true,
+    sameSite: 'strict',
+  });
+}
+
+// ---------- FALLBACK FOR REACT ROUTING ----------
+app.use((_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+// ---------- START SERVER ----------
+app.listen(port, () => {
+  console.log(`WHO-1 backend running on port ${port}`);
 });
