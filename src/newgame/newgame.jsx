@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Scoreboard from '../scoreboard.jsx';
-import { saveGame } from '../gamesService'; // <-- connects to backend/localStorage
+import { saveGame } from '../gamesService';
 
 export function Newgame() {
   const [team1, setTeam1] = useState('');
@@ -9,104 +9,109 @@ export function Newgame() {
   const [players2, setPlayers2] = useState('');
   const [message, setMessage] = useState('');
 
+  const [activeGameId, setActiveGameId] = useState(null);
+
+  function generateGameId() {
+    return Math.random().toString(36).substring(2, 10).toUpperCase();
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // simple validation
     if (!team1 || !team2) {
       setMessage('❌ Please enter both team names.');
       return;
     }
 
-    const team1Players = players1.split(',').map(p => p.trim()).filter(p => p);
-    const team2Players = players2.split(',').map(p => p.trim()).filter(p => p);
+    const team1Players = players1.split(',').map(p => p.trim()).filter(Boolean);
+    const team2Players = players2.split(',').map(p => p.trim()).filter(Boolean);
 
-    // build game object
+    const gameId = generateGameId();
+
     const newGame = {
-      player: 'System', // or user if logged in
-      team: `${team1} vs ${team2}`,
-      score: 0,
+      id: gameId,
       team1,
       team2,
       team1Players,
-      team2Players
+      team2Players,
+      score1: 0,
+      score2: 0
     };
 
     try {
-      const saved = await saveGame(newGame.player, newGame.team, newGame.score);
-      setMessage(`✅ Game created: ${team1} vs ${team2}`);
-      // reset fields
+      await saveGame("System", `${team1} vs ${team2}`, 0);
+
+      setMessage(`✅ Game created! ID: ${gameId}`);
+
+      // Show the live scoreboard
+      setActiveGameId(gameId);
+
+      // Reset form
       setTeam1('');
       setTeam2('');
       setPlayers1('');
       setPlayers2('');
+
     } catch (err) {
+      console.error(err);
       setMessage('❌ Could not save game.');
     }
   };
 
   return (
-    <main>
+    <main style={{ padding: "20px" }}>
       <section>
-        <h2>Add Teams</h2>
-        <p>Please login</p>
+        <h2>Create New Game</h2>
 
         <form onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="team1">Team 1: </label>
+            <label>Team 1:</label>
             <input
-              type="text"
-              id="team1"
               value={team1}
               onChange={(e) => setTeam1(e.target.value)}
-              placeholder="name"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="team2">Team 2: </label>
+            <label>Team 2:</label>
             <input
-              type="text"
-              id="team2"
               value={team2}
               onChange={(e) => setTeam2(e.target.value)}
-              placeholder="name"
               required
             />
           </div>
 
-          <h3>Add player names separated by a comma</h3>
+          <h3>Player Names (comma-separated)</h3>
 
           <div>
-            <label htmlFor="team1Players">Team 1 players: </label>
+            <label>Team 1 Players:</label>
             <textarea
-              id="team1Players"
               value={players1}
               onChange={(e) => setPlayers1(e.target.value)}
-            ></textarea>
+            />
           </div>
 
           <div>
-            <label htmlFor="team2Players">Team 2 players: </label>
+            <label>Team 2 Players:</label>
             <textarea
-              id="team2Players"
               value={players2}
               onChange={(e) => setPlayers2(e.target.value)}
-            ></textarea>
+            />
           </div>
 
-          <div>
-            <button type="submit">Track Game</button>
-          </div>
+          <button type="submit">Start Game</button>
         </form>
 
         {message && <p>{message}</p>}
       </section>
 
-      <aside>
-        {/* You can display <Scoreboard /> here later */}
-      </aside>
+      {activeGameId && (
+        <aside style={{ marginTop: "30px" }}>
+          <h3>Live Scoreboard</h3>
+          <Scoreboard gameId={activeGameId} />
+        </aside>
+      )}
     </main>
   );
 }

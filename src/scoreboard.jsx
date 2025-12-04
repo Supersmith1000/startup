@@ -5,18 +5,21 @@ export default function Scoreboard({ gameId }) {
   const [teamTwoScore, setTeamTwoScore] = useState(0);
   const wsRef = useRef(null);
 
-  // Choose correct websocket URL based on environment
+  // Correct websocket URL
   const wsUrl =
     window.location.hostname === "localhost"
       ? `ws://localhost:4000/ws?gameId=${gameId}`
       : `wss://startup.who-1.com/ws?gameId=${gameId}`;
 
   useEffect(() => {
+    if (!gameId) return;
+
+    console.log("Connecting to:", wsUrl);
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("Connected to WS for game:", gameId);
+      console.log("WS connected for game:", gameId);
     };
 
     ws.onmessage = (msg) => {
@@ -29,22 +32,24 @@ export default function Scoreboard({ gameId }) {
     };
 
     ws.onclose = () => {
-      console.log("Disconnected from WS");
+      console.log("WS disconnected");
     };
 
     return () => ws.close();
   }, [gameId]);
 
-  // Send updated score to server + other players
+  // Send score to server → synced to all clients
   function sendScoreUpdate(newOne, newTwo) {
-    wsRef.current?.send(
-      JSON.stringify({
-        type: "score_update",
-        gameId,
-        team1: newOne,
-        team2: newTwo,
-      })
-    );
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(
+        JSON.stringify({
+          type: "score_update",
+          gameId,
+          team1: newOne,
+          team2: newTwo,
+        })
+      );
+    }
   }
 
   function addTeamOne() {
@@ -59,27 +64,60 @@ export default function Scoreboard({ gameId }) {
     sendScoreUpdate(teamOneScore, newScore);
   }
 
-  // Win condition (optional)
-  useEffect(() => {
-    if (teamOneScore === 10 || teamTwoScore === 10) {
-      alert('We have a winner!');
-    }
-  }, [teamOneScore, teamTwoScore]);
-
   return (
-    <div className="scoreboard" style={{ textAlign: "center", padding: "20px" }}>
-      <h1>WHO-1 Scoreboard</h1>
+    <div
+      className="scoreboard"
+      style={{
+        textAlign: "center",
+        padding: "20px",
+        background: "#222",
+        color: "white",
+        borderRadius: "10px",
+        width: "80%",
+        margin: "20px auto",
+      }}
+    >
+      <h1>🏀 WHO-1 Scoreboard</h1>
       <h3>Game ID: {gameId}</h3>
 
-      <div className="scores" style={{ display: "flex", justifyContent: "center", gap: "40px" }}>
+      <div
+        className="scores"
+        style={{
+          display: "flex",
+          justifyContent: "space-evenly",
+          marginTop: "30px",
+        }}
+      >
+        {/* TEAM 1 */}
         <div>
-          <h2>Team 1: {teamOneScore}</h2>
-          <button onClick={addTeamOne}>+1</button>
+          <h2 style={{ fontSize: "32px" }}>Team 1: {teamOneScore}</h2>
+          <button
+            onClick={addTeamOne}
+            style={{
+              padding: "10px 20px",
+              fontSize: "20px",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            +1
+          </button>
         </div>
 
+        {/* TEAM 2 */}
         <div>
-          <h2>Team 2: {teamTwoScore}</h2>
-          <button onClick={addTeamTwo}>+1</button>
+          <h2 style={{ fontSize: "32px" }}>Team 2: {teamTwoScore}</h2>
+          <button
+            onClick={addTeamTwo}
+            style={{
+              padding: "10px 20px",
+              fontSize: "20px",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            +1
+          </button>
         </div>
       </div>
     </div>
