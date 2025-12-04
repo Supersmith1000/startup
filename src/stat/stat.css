@@ -1,49 +1,89 @@
-header {
-  background-color: #4A4A4A;
-  color: #ffffff;
+/* Container */
+.nba-container {
+  padding: 1.5rem;
+  padding-bottom: 6rem; /* prevents footer overlap */
+  color: white;
   text-align: center;
 }
 
-nav ul {
-  list-style: none;
+/* Title */
+.nba-title {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+}
+
+/* List Layout */
+.nba-list {
   display: flex;
-  justify-content: center;
-  gap: 1rem;
-  flex-wrap: wrap; 
-}
-nav ul li { 
-  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-nav ul li a {
-  display: inline-block;
-  text-decoration: none;
-  white-space: nowrap;
-  
-  color: #333;
-  background-color: #f5f5f5;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background 0.3s, color 0.3s;
+/* Game Card */
+.nba-game-card {
+  background: #3A3A3A;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
-nav ul li a:hover {
-  background-color: #333;
-  color: #fff;
+/* Status Row */
+.nba-status-row {
+  margin-bottom: 0.75rem;
 }
 
-body {
-  background-color: #2E2E2E;
-  color: #F5F5F5;
-  margin: 0;
+.live-badge {
+  background: #ff2d2d;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
-footer {
-  background-color: #4A4A4A;
-  color: #ffffff;
-  text-align: center;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  padding: 0.5rem;
+.final-badge {
+  background: #0a84ff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.scheduled-badge {
+  background: #666;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* Teams */
+.nba-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team-logo {
+  width: 40px;
+  height: 40px;
+}
+
+.team-name {
+  flex: 1;
+  text-align: left;
+  margin-left: 1rem;
+}
+
+.team-score {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+/* Clock + Period */
+.nba-clock {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
 }

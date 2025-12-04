@@ -2,66 +2,68 @@ import React, { useEffect, useState } from 'react';
 
 export function Stat() {
   const [games, setGames] = useState([]);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  async function loadGames() {
+    try {
+      const res = await fetch("/api/nba");
+      const data = await res.json();
+      setGames(data.games || []);
+    } catch (err) {
+      console.error("Failed to load games", err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadGames() {
-      try {
-        const response = await fetch('/api/nba', {
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // ✅ your API response uses data.data
-        setGames(data.data ?? []);
-
-      } catch (err) {
-        console.error('Failed to load NBA data:', err);
-        setError('❌ Unable to load live NBA games.');
-      }
-    }
-
     loadGames();
+
+    // Optional auto-refresh every 30 seconds
+    const interval = setInterval(loadGames, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  if (error) return <p className="text-danger">{error}</p>;
-  if (!games.length) return <p>Loading live NBA games…</p>;
+  if (loading) return <p>Loading games...</p>;
+
+  if (games.length === 0)
+    return <p>No NBA games found for today.</p>;
 
   return (
-    <main className="p-4">
-      <h2>🏀 Live NBA Games</h2>
-      <ul className="list-unstyled">
-        {games.map((g) => (
-          <li
-            key={g.id}
-            className="border rounded p-3 my-2 bg-dark text-light"
-          >
-            <strong>{g.visitor_team.full_name}</strong> vs{' '}
-            <strong>{g.home_team.full_name}</strong>
+    <div style={{ padding: "20px" }}>
+      <h2>NBA Scoreboard</h2>
 
-            <div>
-              Tip-off:{' '}
-              {new Date(g.datetime).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </div>
+      {games.map((g) => (
+        <div
+          key={g.id}
+          style={{
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "12px",
+            marginBottom: "12px",
+            background:
+              g.state === "in"
+                ? "#ffe5e5"          // live games highlighted
+                : g.state === "post"
+                ? "#f0f0f0"          // finished games grey
+                : "white",           // upcoming games normal
+          }}
+        >
+          <h3 style={{ margin: "0 0 8px 0" }}>
+            {g.home.name} vs {g.away.name}
+          </h3>
 
-            <div>
-              Status: {g.status.includes('T') ? 'Scheduled' : g.status}
-            </div>
+          <p style={{ margin: 0 }}>
+            <strong>Status:</strong> {g.status}
+          </p>
 
-            <div>
-              Score: {g.visitor_team_score} - {g.home_team_score}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </main>
+          <p style={{ margin: 0 }}>
+            <strong>{g.home.name}</strong>: {g.home.score}
+            <br />
+            <strong>{g.away.name}</strong>: {g.away.score}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }

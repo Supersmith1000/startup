@@ -4,18 +4,12 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
 const path = require('path');
-
-const {
-  getUser,
-  getUserByToken,
-  addUser,
-  updateUser,
-  addGame,
-  getGamesByUser,
-} = require('./service/database');
+const { getUser, getUserByToken, addUser, updateUser, addGame, getGamesByUser } =
+  require('./service/database');
 
 const app = express();
 
+// Fallback fetch for older Node versions
 if (typeof fetch === 'undefined') {
   global.fetch = (...args) =>
     import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -24,8 +18,8 @@ if (typeof fetch === 'undefined') {
 const authCookieName = 'token';
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
+// ---------- Middleware ----------
 app.use(express.json());
-
 app.use(cookieParser());
 
 app.use(
@@ -35,27 +29,21 @@ app.use(
   })
 );
 
+// Serve React build files
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
 
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
 
+// ---------- AUTH ROUTES ----------
 apiRouter.post('/auth/create', async (req, res) => {
   const { email, password } = req.body;
 
   const existing = await getUser(email);
-  if (existing) {
-    res.status(409).send({ msg: 'Existing user' });
-    return;
-  }
+  if (existing) return res.status(409).send({ msg: 'Existing user' });
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = {
-    email,
-    passwordHash,
-    token: uuid.v4(),
-  };
+  const user = { email, passwordHash, token: uuid.v4() };
 
   await addUser(user);
   setAuthCookie(res, user.token);
@@ -67,16 +55,10 @@ apiRouter.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
 
   const user = await getUser(email);
-  if (!user) {
-    res.status(401).send({ msg: 'Unauthorized' });
-    return;
-  }
+  if (!user) return res.status(401).send({ msg: 'Unauthorized' });
 
   const matches = await bcrypt.compare(password, user.passwordHash);
-  if (!matches) {
-    res.status(401).send({ msg: 'Unauthorized' });
-    return;
-  }
+  if (!matches) return res.status(401).send({ msg: 'Unauthorized' });
 
   user.token = uuid.v4();
   await updateUser(user);
@@ -97,20 +79,16 @@ apiRouter.delete('/auth/logout', async (req, res) => {
   res.status(204).end();
 });
 
-
+// ---------- AUTH MIDDLEWARE ----------
 const verifyAuth = async (req, res, next) => {
   const user = await getUserByToken(req.cookies[authCookieName]);
+  if (!user) return res.status(401).send({ msg: 'Unauthorized' });
 
-  if (user) {
-    req.user = user;
-    next();
-  } else {
-    res.status(401).send({ msg: 'Unauthorized' });
-  }
+  req.user = user;
+  next();
 };
 
-
-
+// ---------- GAME STORAGE ----------
 apiRouter.get('/games', verifyAuth, async (req, res) => {
   const games = await getGamesByUser(req.user.email);
   res.send(games);
@@ -137,70 +115,78 @@ apiRouter.get('/games/:id', verifyAuth, async (req, res) => {
   else res.status(404).send({ msg: 'Game not found' });
 });
 
+// ---------- ESPN NBA LIVE DATA ROUTE ----------
 apiRouter.get('/nba', async (req, res) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
-
-    const response = await fetch(
-      `https://api.balldontlie.io/v1/games?dates[]=${today}`,
-      {
-        headers: {
-          Authorization: 'Bearer 2873b959-b285-4125-a3a7-682509f51981',
-        },
-      }
+    // Get EST date
+    const estNow = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
     );
 
-    if (!response.ok) {
-      return res
-        .status(response.status)
-        .json({ error: 'Failed to fetch NBA data' });
-    }
+    const format = (d) =>
+      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(
+        d.getDate()
+      ).padStart(2, '0')}`;
 
-    const data = await response.json();
+    const today = new Date(estNow);
+    const yesterday = new Date(estNow);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    if (!data.data || data.data.length === 0) {
-      const yesterday = new Date(Date.now() - 86400000)
-        .toISOString()
-        .split('T')[0];
+    const dates = [format(today), format(yesterday)];
 
-      const fallback = await fetch(
-        `https://api.balldontlie.io/v1/games?dates[]=${yesterday}`,
-        {
-          headers: {
-            Authorization: 'Bearer 2873b959-b285-4125-a3a7-682509f51981',
+    // Fetch both days from ESPN
+    const fetchGames = async (date) => {
+      const url = `https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/scoreboard?dates=${date}`;
+      const response = await fetch(url);
+      const json = await response.json();
+      return json.events || [];
+    };
+
+    let eventUrls = [
+      ...(await fetchGames(dates[0])),
+      ...(await fetchGames(dates[1])),
+    ];
+
+    // remove duplicates
+    eventUrls = [...new Set(eventUrls)];
+
+    const games = await Promise.all(
+      eventUrls.map(async (eventUrl) => {
+        const eventResp = await fetch(eventUrl);
+        const eventData = await eventResp.json();
+
+        const compUrl = eventData.competitions[0];
+        const compResp = await fetch(compUrl);
+        const comp = await compResp.json();
+
+        const home = comp.competitors.find((t) => t.homeAway === "home");
+        const away = comp.competitors.find((t) => t.homeAway === "away");
+
+        return {
+          id: eventData.id,
+          status: comp.status.type.shortDetail,
+          state: comp.status.type.state, // "in", "post", "pre"
+          home: {
+            name: home.team.displayName,
+            score: Number(home.score),
           },
-        }
-      );
+          away: {
+            name: away.team.displayName,
+            score: Number(away.score),
+          },
+        };
+      })
+    );
 
-      return res.json(await fallback.json());
-    }
+    // Only return today's relevant games
+    const filtered = games.filter((g) =>
+      ["in", "pre"].includes(g.state)
+    );
 
-    res.json(data);
+    res.json({ games: filtered });
+
   } catch (err) {
-    console.error('NBA API error:', err);
-    res.status(500).json({ error: 'Failed to fetch games' });
+    console.error("NBA API error:", err);
+    res.status(500).json({ error: "Failed to fetch games" });
   }
-});
-
-function setAuthCookie(res, token) {
-  res.cookie(authCookieName, token, {
-    maxAge: 1000 * 60 * 60 * 24 * 365,
-    secure: true,
-    httpOnly: true,
-    sameSite: 'strict',
-  });
-}
-
-app.use((err, req, res, next) => {
-  console.error('Unexpected error:', err);
-  res.status(500).send({ type: err.name, message: err.message });
-});
-
-app.use((_req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-});
-
-
-app.listen(port, () => {
-  console.log(`WHO-1 service backend running on port ${port}`);
 });
