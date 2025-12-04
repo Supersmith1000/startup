@@ -54,6 +54,7 @@ function MainLayout() {
               <li><NavLink className="nav-btn" to="/pastgames">View Past Games</NavLink></li>
               <li><NavLink className="nav-btn" to="/stat">Stats</NavLink></li>
               <li><NavLink className="nav-btn" to="/about">About</NavLink></li>
+              <li><NavLink className="nav-btn" to="/ws-test">WS Test</NavLink></li>
             </ul>
           </nav>
         </header>

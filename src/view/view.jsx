@@ -2,48 +2,41 @@ import React, { useState } from 'react';
 import Scoreboard from '../scoreboard.jsx';
 
 export function View() {
-  const [gameId, setGameId] = useState('');
-  const [activeGame, setActiveGame] = useState(null);
+  const [gameId, setGameId] = useState("");
+  const [activeGameId, setActiveGameId] = useState(null);
 
-  function handleSearch() {
-    if (!gameId.trim()) {
-      alert("Please enter a valid Game ID");
-      return;
+  function searchGame() {
+    if (gameId.trim() !== "") {
+      setActiveGameId(gameId.trim());
     }
-    setActiveGame(gameId.trim());
   }
 
   return (
-    <main style={{ textAlign: "center", padding: "20px" }}>
+    <main style={{ textAlign: "center", paddingTop: "20px" }}>
       <section>
-        <h2>Live Game Viewer</h2>
+        <h2>Live Game</h2>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label htmlFor="text">Game ID#: </label>
+        <div>
+          <label>Game ID#: </label>
           <input
             type="text"
-            id="text"
-            name="varText"
-            placeholder="Enter Game ID"
+            placeholder="##"
             value={gameId}
             onChange={(e) => setGameId(e.target.value)}
-            style={{ marginLeft: "10px", padding: "5px" }}
           />
         </div>
 
         <div>
-          <button onClick={handleSearch}>Search</button>
+          <button onClick={searchGame}>Search</button>
         </div>
       </section>
 
-      <aside style={{ marginTop: "30px" }}>
-        {activeGame && (
-          <div>
-            <h3>Viewing Live Game: {activeGame}</h3>
-            <Scoreboard gameId={activeGame} />
-          </div>
-        )}
-      </aside>
+      <hr style={{ margin: "20px auto", width: "50%" }} />
+
+      {/* ⭐ SHOW SCOREBOARD WHEN GAME ID FOUND ⭐ */}
+      {activeGameId && (
+        <Scoreboard gameId={activeGameId} />
+      )}
     </main>
   );
 }
