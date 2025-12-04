@@ -38,9 +38,10 @@ app.use(
   })
 );
 
-// Serve React build files
+// Serve React build
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// API Router
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
 
@@ -97,7 +98,7 @@ const verifyAuth = async (req, res, next) => {
   next();
 };
 
-// ---------- GAME STORAGE ----------
+// ---------- GAMES API ----------
 apiRouter.get('/games', verifyAuth, async (req, res) => {
   const games = await getGamesByUser(req.user.email);
   res.send(games);
@@ -124,7 +125,7 @@ apiRouter.get('/games/:id', verifyAuth, async (req, res) => {
   else res.status(404).send({ msg: 'Game not found' });
 });
 
-// ---------- ESPN NBA LIVE DATA ROUTE ----------
+// ---------- NBA LIVE ROUTE ----------
 apiRouter.get('/nba', async (req, res) => {
   try {
     const estNow = new Date(
@@ -181,20 +182,14 @@ function setAuthCookie(res, token) {
   });
 }
 
-// ---------- FALLBACK FOR REACT ROUTING ----------
-app.use((_req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ---------- WEBSOCKET SUPPORT ----------
+// ---------- CREATE HTTP SERVER FIRST ----------
 const server = http.createServer(app);
 
-// WebSocket server at /ws
+// ---------- WEBSOCKETS ----------
 const wss = new WebSocket.Server({ noServer: true });
 
-// Upgrade handler
 server.on('upgrade', (req, socket, head) => {
-  if (req.url === '/ws') {
+  if (req.url.startsWith('/ws')) {
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit('connection', ws, req);
     });
@@ -203,7 +198,6 @@ server.on('upgrade', (req, socket, head) => {
   }
 });
 
-// WebSocket connection
 wss.on('connection', (ws) => {
   console.log("WebSocket client connected");
 
@@ -212,17 +206,14 @@ wss.on('connection', (ws) => {
     msg: "Welcome to WHO-1 WebSocket!"
   }));
 
-  // Example: server pushes time every 5 seconds
-  setInterval(() => {
-    ws.send(JSON.stringify({
-      type: "time",
-      timestamp: new Date().toLocaleTimeString()
-    }));
-  }, 5000);
-
   ws.on('message', (data) => {
     console.log("WS message:", data.toString());
   });
+});
+
+// ---------- FALLBACK FOR REACT ROUTING (MUST BE LAST) ----------
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // ---------- START SERVER ----------
