@@ -4,6 +4,9 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
 const path = require('path');
+const http = require('http');
+const WebSocket = require('ws');
+
 const {
   getUser,
   getUserByToken,
@@ -32,7 +35,7 @@ app.use(
   cors({
     origin: ['http://localhost:5173', 'https://startup.who-1.com'],
     credentials: true,
-  }),
+  })
 );
 
 // Serve React build files
@@ -124,70 +127,44 @@ apiRouter.get('/games/:id', verifyAuth, async (req, res) => {
 // ---------- ESPN NBA LIVE DATA ROUTE ----------
 apiRouter.get('/nba', async (req, res) => {
   try {
-    // Get EST
     const estNow = new Date(
-      new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }),
+      new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })
     );
 
-    const format = (d) =>
-      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(
-        d.getDate(),
-      ).padStart(2, '0')}`;
+    const y = estNow.getFullYear();
+    const m = String(estNow.getMonth() + 1).padStart(2, '0');
+    const d = String(estNow.getDate()).padStart(2, '0');
 
-    const today = new Date(estNow);
-    const yesterday = new Date(estNow);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const dateParam = `${y}${m}${d}`;
 
-    const dates = [format(today), format(yesterday)];
+    const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=${dateParam}`;
+    const response = await fetch(url);
+    const json = await response.json();
 
-    // Fetch both days
-    const fetchGames = async (date) => {
-      const url = `https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/scoreboard?dates=${date}`;
-      const response = await fetch(url);
-      const json = await response.json();
-      return json.events || [];
-    };
+    const games = (json?.events || []).map((event) => {
+      const comp = event.competitions?.[0];
+      const status = comp?.status?.type?.shortDetail ?? 'Unknown';
+      const state = comp?.status?.type?.state ?? 'pre';
 
-    let eventUrls = [
-      ...(await fetchGames(dates[0])),
-      ...(await fetchGames(dates[1])),
-    ];
+      const home = comp?.competitors?.find((t) => t.homeAway === 'home');
+      const away = comp?.competitors?.find((t) => t.homeAway === 'away');
 
-    // Remove duplicates
-    eventUrls = [...new Set(eventUrls)];
+      return {
+        id: event.id,
+        status,
+        state,
+        home: {
+          name: home?.team?.displayName ?? '',
+          score: Number(home?.score ?? 0),
+        },
+        away: {
+          name: away?.team?.displayName ?? '',
+          score: Number(away?.score ?? 0),
+        },
+      };
+    });
 
-    const games = await Promise.all(
-      eventUrls.map(async (eventUrl) => {
-        const eventResp = await fetch(eventUrl);
-        const eventData = await eventResp.json();
-
-        const compUrl = eventData.competitions[0];
-        const compResp = await fetch(compUrl);
-        const comp = await compResp.json();
-
-        const home = comp.competitors.find((t) => t.homeAway === 'home');
-        const away = comp.competitors.find((t) => t.homeAway === 'away');
-
-        return {
-          id: eventData.id,
-          status: comp.status.type.shortDetail,
-          state: comp.status.type.state, // "in", "post", "pre"
-          home: {
-            name: home.team.displayName,
-            score: Number(home.score),
-          },
-          away: {
-            name: away.team.displayName,
-            score: Number(away.score),
-          },
-        };
-      }),
-    );
-
-    // Filter only today's live/upcoming games
-    const filtered = games.filter((g) => ['in', 'pre'].includes(g.state));
-
-    res.json({ games: filtered });
+    res.json({ games });
   } catch (err) {
     console.error('NBA API error:', err);
     res.status(500).json({ error: 'Failed to fetch games' });
@@ -209,7 +186,46 @@ app.use((_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// ---------- START SERVER ----------
-app.listen(port, () => {
-  console.log(`WHO-1 backend running on port ${port}`);
+// ---------- WEBSOCKET SUPPORT ----------
+const server = http.createServer(app);
+
+// WebSocket server at /ws
+const wss = new WebSocket.Server({ noServer: true });
+
+// Upgrade handler
+server.on('upgrade', (req, socket, head) => {
+  if (req.url === '/ws') {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
+  } else {
+    socket.destroy();
+  }
 });
+
+// WebSocket connection
+wss.on('connection', (ws) => {
+  console.log("WebSocket client connected");
+
+  ws.send(JSON.stringify({
+    type: "connected",
+    msg: "Welcome to WHO-1 WebSocket!"
+  }));
+
+  // Example: server pushes time every 5 seconds
+  setInterval(() => {
+    ws.send(JSON.stringify({
+      type: "time",
+      timestamp: new Date().toLocaleTimeString()
+    }));
+  }, 5000);
+
+  ws.on('message', (data) => {
+    console.log("WS message:", data.toString());
+  });
+});
+
+// ---------- START SERVER ----------
+server.listen(port, () =>
+  console.log(`WHO-1 backend running with WebSocket on port ${port}`)
+);
