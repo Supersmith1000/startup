@@ -195,8 +195,8 @@ server.on('upgrade', (req, socket, head) => {
 
 // ------------------- WS CONNECTION -------------------
 wss.on('connection', (ws, req) => {
-  const fullUrl = new URL(req.url, "http://localhost");
-  ws.gameId = fullUrl.searchParams.get("gameId");
+  const urlObj = new URL(`http://dummy${req.url}`);
+  ws.gameId = urlObj.searchParams.get("gameId");
 
   console.log(`WS client connected to game ${ws.gameId}`);
 
@@ -210,6 +210,9 @@ wss.on('connection', (ws, req) => {
     let data;
     try { data = JSON.parse(raw.toString()); }
     catch { return; }
+
+    console.log("SERVER RECEIVED:", data);
+
 
     if (data.type === "score_update") {
       wss.clients.forEach(client => {

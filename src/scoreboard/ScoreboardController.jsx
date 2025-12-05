@@ -30,8 +30,7 @@ export default function ScoreboardController({ gameId }) {
   }, [gameId]);
 
   function sendScoreUpdate(one, two) {
-    console.log("SENDING SCORE UPDATE:", { one, two });
-
+    console.log("SENDING SCORE UPDATE:", { one, two, ws: wsRef.current });
     wsRef.current?.send(
       JSON.stringify({
         type: "score_update",

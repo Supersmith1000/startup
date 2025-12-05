@@ -30,7 +30,10 @@ export function View() {
       <hr style={{ margin: "30px auto", width: "50%" }} />
 
       {/* Read-only viewer scoreboard */}
-      {activeGameId && <ScoreboardViewer gameId={activeGameId} />}
+      {activeGameId && (
+        <ScoreboardViewer key={activeGameId} gameId={activeGameId} />
+)}
+
     </main>
   );
 }

@@ -5,19 +5,21 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isLogin, setIsLogin] = useState(true); // 🔥 toggle between login/signup
 
-  // 🔥 Enable special background mode for login
   useEffect(() => {
     document.body.classList.add("login-mode");
     return () => document.body.classList.remove("login-mode");
   }, []);
 
-  async function loginUser(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setMessage("");
 
+    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/create";
+
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -25,11 +27,11 @@ export function Login() {
       });
 
       if (!res.ok) {
-        setMessage("Invalid login.");
+        setMessage(isLogin ? "Invalid login." : "Account creation failed.");
         return;
       }
 
-      setMessage("Logged in!");
+      setMessage(isLogin ? "Logged in!" : "Account created!");
       document.body.classList.remove("login-mode");
       window.location.href = "/view";
     } catch (err) {
@@ -39,10 +41,12 @@ export function Login() {
 
   return (
     <div className="login-box">
-      <h2 className="login-title">Login</h2>
-      <p className="login-sub">Please log in</p>
+      <h2 className="login-title">{isLogin ? "Login" : "Create Account"}</h2>
+      <p className="login-sub">
+        {isLogin ? "Please log in" : "Make a new account"}
+      </p>
 
-      <form className="login-form" onSubmit={loginUser}>
+      <form className="login-form" onSubmit={handleSubmit}>
         <label className="login-label">Email</label>
         <input
           className="login-input"
@@ -62,15 +66,15 @@ export function Login() {
         />
 
         <button className="primary-btn" type="submit">
-          Login
+          {isLogin ? "Login" : "Create Account"}
         </button>
       </form>
 
       <button
         className="link-btn"
-        onClick={() => alert("Signup coming soon!")}
+        onClick={() => setIsLogin(!isLogin)}
       >
-        Create one
+        {isLogin ? "Create one" : "Already have an account?"}
       </button>
 
       {message && <div className="login-message">{message}</div>}

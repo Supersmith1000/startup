@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 
 export default function ScoreboardViewer({ gameId }) {
-  const [teamOneScore, setTeamOneScore] = useState(0);
-  const [teamTwoScore, setTeamTwoScore] = useState(0);
-  const wsRef = useRef(null);
 
+  // 🔥 DEBUG LOGS — REQUIRED
   const wsUrl =
     window.location.hostname === "localhost"
       ? `ws://localhost:4000/ws?gameId=${gameId}`
       : `wss://startup.who-1.com/ws?gameId=${gameId}`;
+
+  console.log("Viewer mounted with gameId:", gameId);
+  console.log("Connecting to WS URL:", wsUrl);
+
+  const [teamOneScore, setTeamOneScore] = useState(0);
+  const [teamTwoScore, setTeamTwoScore] = useState(0);
+  const wsRef = useRef(null);
 
   useEffect(() => {
     console.log("Viewer connecting to:", wsUrl);
